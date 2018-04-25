@@ -1,5 +1,5 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
 
     文件名：LoginAuthApi.cs
     文件功能描述：企业号登录授权接口
@@ -44,7 +44,7 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
         /// <returns></returns>
         public static GetLoginUrlResult GetLoginUrl(string providerAccessToken, string loginTicket, string target, int agentid, int timeOut = Config.TIME_OUT)
         {
-                string url = "https://qyapi.weixin.qq.com/cgi-bin/service/get_login_url?provider_access_token={0}";
+                string url = Config.ApiWorkHost + "/cgi-bin/service/get_login_url?provider_access_token={0}";
 
                 var data = new
                 {
@@ -71,7 +71,7 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
         /// <returns></returns>
         public static async Task<GetLoginUrlResult> GetLoginUrlAsync(string providerAccessToken, string loginTicket, string target, int agentid, int timeOut = Config.TIME_OUT)
         {
-                string url = "https://qyapi.weixin.qq.com/cgi-bin/service/get_login_url?provider_access_token={0}";
+                string url = Config.ApiWorkHost + "/cgi-bin/service/get_login_url?provider_access_token={0}";
 
                 var data = new
                 {

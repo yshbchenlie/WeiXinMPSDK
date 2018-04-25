@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -37,7 +37,7 @@ namespace Senparc.Weixin.HttpUtility.Tests
         public void HttpGetTest()
         {
             return;//已经通过，但需要连接远程测试，太耗时，常规测试时暂时忽略。
-            var url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
+            var url = Config.ApiMpHost + "/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
             var exceptResult = @"{""errcode"":40013,""errmsg"":""invalid appid""}";
             var actualResult = RequestUtility.HttpGet(url, null);
             Assert.AreEqual(exceptResult, actualResult);

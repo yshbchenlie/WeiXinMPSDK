@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
 
     文件名：RequestUtility.Post.cs
     文件功能描述：获取请求结果（Post）
@@ -40,6 +40,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Senparc.Weixin.Helpers;
+
 #if NET35 || NET40 || NET45
 using System.Web;
 #else
@@ -62,10 +63,23 @@ namespace Senparc.Weixin.HttpUtility
 
 #if NET35 || NET40 || NET45
 
-
+        /// <summary>
+        /// 给.NET Framework使用的HttpPost请求公共设置方法
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="cookieContainer"></param>
+        /// <param name="postStream"></param>
+        /// <param name="fileDictionary"></param>
+        /// <param name="refererUrl"></param>
+        /// <param name="encoding"></param>
+        /// <param name="cer"></param>
+        /// <param name="useAjax"></param>
+        /// <param name="timeOut"></param>
+        /// <param name="checkValidationResult"></param>
+        /// <returns></returns>
         public static HttpWebRequest HttpPost_Common_Net45(string url, CookieContainer cookieContainer = null,
             Stream postStream = null, Dictionary<string, string> fileDictionary = null, string refererUrl = null,
-            Encoding encoding = null, X509Certificate2 cer = null, int timeOut = Config.TIME_OUT,
+            Encoding encoding = null, X509Certificate2 cer = null, bool useAjax = false, int timeOut = Config.TIME_OUT,
             bool checkValidationResult = false)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
@@ -83,7 +97,7 @@ namespace Senparc.Weixin.HttpUtility
                   new RemoteCertificateValidationCallback(CheckValidationResult);
             }
 
-            #region 处理Form表单文件上传
+        #region 处理Form表单文件上传
             var formUploadFile = fileDictionary != null && fileDictionary.Count > 0;//是否用Form上传文件
             if (formUploadFile)
             {
@@ -151,17 +165,11 @@ namespace Senparc.Weixin.HttpUtility
             {
                 request.ContentType = "application/x-www-form-urlencoded";
             }
-            #endregion
+        #endregion
 
             request.ContentLength = postStream != null ? postStream.Length : 0;
-            request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
-            request.KeepAlive = true;
 
-            if (!string.IsNullOrEmpty(refererUrl))
-            {
-                request.Referer = refererUrl;
-            }
-            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36";
+            HttpClientHeader(request, refererUrl, useAjax, timeOut);
 
             if (cookieContainer != null)
             {
@@ -174,13 +182,33 @@ namespace Senparc.Weixin.HttpUtility
 #endif
 
 #if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP2_0
+        /// <summary>
+        /// 给.NET Core使用的HttpPost请求公共设置方法
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="hc"></param>
+        /// <param name="cookieContainer"></param>
+        /// <param name="postStream"></param>
+        /// <param name="fileDictionary"></param>
+        /// <param name="refererUrl"></param>
+        /// <param name="encoding"></param>
+        /// <param name="cer"></param>
+        /// <param name="useAjax"></param>
+        /// <param name="timeOut"></param>
+        /// <param name="checkValidationResult"></param>
+        /// <returns></returns>
         public static HttpClient HttpPost_Common_NetCore(string url, out HttpContent hc, CookieContainer cookieContainer = null,
             Stream postStream = null, Dictionary<string, string> fileDictionary = null, string refererUrl = null,
-            Encoding encoding = null, X509Certificate2 cer = null, int timeOut = Config.TIME_OUT,
+            Encoding encoding = null, X509Certificate2 cer = null, bool useAjax = false, int timeOut = Config.TIME_OUT,
             bool checkValidationResult = false)
         {
-            HttpClientHandler handler = new HttpClientHandler();
-            handler.CookieContainer = cookieContainer;
+            var handler = new HttpClientHandler()
+            {
+                UseProxy = _webproxy != null,
+                Proxy = _webproxy,
+                UseCookies = true,
+                CookieContainer = cookieContainer,
+            };
 
             if (checkValidationResult)
             {
@@ -193,7 +221,7 @@ namespace Senparc.Weixin.HttpUtility
             }
 
             HttpClient client = new HttpClient(handler);
-            HttpClientHeader(client, timeOut);
+            HttpClientHeader(client, refererUrl, useAjax, timeOut);
 
 
         #region 处理Form表单文件上传
@@ -204,7 +232,9 @@ namespace Senparc.Weixin.HttpUtility
 
                 //通过表单上传文件
                 string boundary = "----" + DateTime.Now.Ticks.ToString("x");
-                hc = new MultipartFormDataContent(boundary);
+
+                var multipartFormDataContent = new MultipartFormDataContent(boundary);
+                hc = multipartFormDataContent;
 
                 foreach (var file in fileDictionary)
                 {
@@ -217,14 +247,16 @@ namespace Senparc.Weixin.HttpUtility
                             if (fileStream != null)
                             {
                                 //存在文件
-                                //hc.Add(new StreamContent(fileStream), file.Key, Path.GetFileName(fileName)); //报流已关闭的异常
+
+
+                                //multipartFormDataContent.Add(new StreamContent(fileStream), file.Key, Path.GetFileName(fileName)); //报流已关闭的异常
+                                multipartFormDataContent.Add(CreateFileContent(File.Open(fileName, FileMode.Open), Path.GetFileName(fileName)), file.Key, Path.GetFileName(fileName));
                                 fileStream.Dispose();
-                                (hc as MultipartFormDataContent).Add(CreateFileContent(File.Open(fileName, FileMode.Open), Path.GetFileName(fileName)), file.Key, Path.GetFileName(fileName));
                             }
                             else
                             {
                                 //不存在文件或只是注释
-                                (hc as MultipartFormDataContent).Add(new StringContent(string.Empty), file.Key, file.Value);
+                                multipartFormDataContent.Add(new StringContent(string.Empty), file.Key, file.Value);
                             }
                         }
                     }
@@ -240,9 +272,11 @@ namespace Senparc.Weixin.HttpUtility
             {
                 hc = new StreamContent(postStream);
 
-                //使用Url格式Form表单Post提交的时候才使用application/x-www-form-urlencoded
-                //hc.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
                 hc.Headers.ContentType = new MediaTypeHeaderValue("text/xml");
+
+                //使用Url格式Form表单Post提交的时候才使用application/x-www-form-urlencoded
+                //去掉注释以测试Request.Body为空的情况
+                //hc.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
             }
 
             //HttpContentHeader(hc, timeOut);
@@ -252,7 +286,6 @@ namespace Senparc.Weixin.HttpUtility
             {
                 client.DefaultRequestHeaders.Referrer = new Uri(refererUrl);
             }
-
 
             return client;
         }
@@ -266,11 +299,11 @@ namespace Senparc.Weixin.HttpUtility
         /// 使用Post方法获取字符串结果，常规提交
         /// </summary>
         /// <returns></returns>
-        public static string HttpPost(string url, CookieContainer cookieContainer = null, Dictionary<string, string> formData = null, Encoding encoding = null, X509Certificate2 cer = null, int timeOut = Config.TIME_OUT)
+        public static string HttpPost(string url, CookieContainer cookieContainer = null, Dictionary<string, string> formData = null, Encoding encoding = null, X509Certificate2 cer = null, bool useAjax = false, int timeOut = Config.TIME_OUT)
         {
             MemoryStream ms = new MemoryStream();
             formData.FillFormDataStream(ms);//填充formData
-            return HttpPost(url, cookieContainer, ms, null, null, encoding, cer, timeOut);
+            return HttpPost(url, cookieContainer, ms, null, null, encoding, cer, useAjax, timeOut);
         }
 
         /// <summary>
@@ -282,11 +315,12 @@ namespace Senparc.Weixin.HttpUtility
         /// <param name="fileDictionary">需要上传的文件，Key：对应要上传的Name，Value：本地文件名</param>
         /// <param name="encoding"></param>
         /// <param name="cer">证书，如果不需要则保留null</param>
+        /// <param name="useAjax"></param>
         /// <param name="timeOut"></param>
         /// <param name="checkValidationResult">验证服务器证书回调自动验证</param>
         /// <param name="refererUrl"></param>
         /// <returns></returns>
-        public static string HttpPost(string url, CookieContainer cookieContainer = null, Stream postStream = null, Dictionary<string, string> fileDictionary = null, string refererUrl = null, Encoding encoding = null, X509Certificate2 cer = null, int timeOut = Config.TIME_OUT, bool checkValidationResult = false)
+        public static string HttpPost(string url, CookieContainer cookieContainer = null, Stream postStream = null, Dictionary<string, string> fileDictionary = null, string refererUrl = null, Encoding encoding = null, X509Certificate2 cer = null, bool useAjax = false, int timeOut = Config.TIME_OUT, bool checkValidationResult = false)
         {
             if (cookieContainer == null)
             {
@@ -294,7 +328,11 @@ namespace Senparc.Weixin.HttpUtility
             }
 
 #if NET35 || NET40 || NET45
-            var request = HttpPost_Common_Net45(url, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, timeOut, checkValidationResult);
+
+            #region 已经使用方法重用
+            /*
+            
+            var request = HttpPost_Common_Net45(url, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, useAjax, timeOut, checkValidationResult);
 
             #region 输入二进制流
             if (postStream != null)
@@ -319,15 +357,18 @@ namespace Senparc.Weixin.HttpUtility
                 postStream.Close();//关闭文件访问
             }
             #endregion
-
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
-            if (cookieContainer != null)
-            {
-                response.Cookies = cookieContainer.GetCookies(response.ResponseUri);
-            }
+            */
 
-            using (Stream responseStream = response.GetResponseStream())
+            #endregion
+
+            var senparcResponse = HttpResponsePost(url, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, useAjax, timeOut, checkValidationResult);
+            HttpWebResponse response = senparcResponse.Result;
+
+            response.Cookies = cookieContainer.GetCookies(response.ResponseUri);
+
+            using (Stream responseStream = response.GetResponseStream() ?? new MemoryStream())
             {
                 using (StreamReader myStreamReader = new StreamReader(responseStream, encoding ?? Encoding.GetEncoding("utf-8")))
                 {
@@ -336,24 +377,89 @@ namespace Senparc.Weixin.HttpUtility
                 }
             }
 #else
-            HttpContent hc;
-            var client = HttpPost_Common_NetCore(url, out hc, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, timeOut, checkValidationResult);
+            var senparcResponse = HttpResponsePost(url, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, useAjax, timeOut, checkValidationResult);
+            var response = senparcResponse.Result;
 
-            var t = client.PostAsync(url, hc).GetAwaiter().GetResult();
-            //t.Wait();
-
-            if (t.Content.Headers.ContentType.CharSet != null &&
-                t.Content.Headers.ContentType.CharSet.ToLower().Contains("utf8"))
+            if (response.Content.Headers.ContentType.CharSet != null &&
+                response.Content.Headers.ContentType.CharSet.ToLower().Contains("utf8"))
             {
-                t.Content.Headers.ContentType.CharSet = "utf-8";
+                response.Content.Headers.ContentType.CharSet = "utf-8";
             }
 
-            var t1 = t.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            return t1;
+            var retString = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            return retString;
 
             //t1.Wait();
             //return t1.Result;
 #endif
+        }
+
+
+        /// <summary>
+        /// 使用Post方法获取HttpWebResponse或HttpResponseMessage对象，本方法独立使用时通常用于测试）
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="cookieContainer"></param>
+        /// <param name="postStream"></param>
+        /// <param name="fileDictionary">需要上传的文件，Key：对应要上传的Name，Value：本地文件名</param>
+        /// <param name="encoding"></param>
+        /// <param name="cer">证书，如果不需要则保留null</param>
+        /// <param name="useAjax"></param>
+        /// <param name="timeOut"></param>
+        /// <param name="checkValidationResult">验证服务器证书回调自动验证</param>
+        /// <param name="refererUrl"></param>
+        /// <returns></returns>
+
+        public static SenparcHttpResponse HttpResponsePost(string url, CookieContainer cookieContainer = null, Stream postStream = null,
+            Dictionary<string, string> fileDictionary = null, string refererUrl = null, Encoding encoding = null,
+            X509Certificate2 cer = null, bool useAjax = false, int timeOut = Config.TIME_OUT,
+            bool checkValidationResult = false)
+        {
+            if (cookieContainer == null)
+            {
+                cookieContainer = new CookieContainer();
+            }
+
+            postStream = postStream ?? new MemoryStream();
+
+#if NET35 || NET40 || NET45
+            var request = HttpPost_Common_Net45(url, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, useAjax, timeOut, checkValidationResult);
+
+            #region 输入二进制流
+            if (postStream != null && postStream.Length > 0)
+            {
+                postStream.Position = 0;
+
+                //直接写入流
+                Stream requestStream = request.GetRequestStream();
+
+                byte[] buffer = new byte[1024];
+                int bytesRead = 0;
+                while ((bytesRead = postStream.Read(buffer, 0, buffer.Length)) != 0)
+                {
+                    requestStream.Write(buffer, 0, bytesRead);
+                }
+
+                //debug
+                //postStream.Seek(0, SeekOrigin.Begin);
+                //StreamReader sr = new StreamReader(postStream);
+                //var postStr = sr.ReadToEnd();
+
+                postStream.Close();//关闭文件访问
+            }
+            #endregion
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            return new SenparcHttpResponse(response);
+#else
+            HttpContent hc;
+            var client = HttpPost_Common_NetCore(url, out hc, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, useAjax, timeOut, checkValidationResult);
+
+            var response = client.PostAsync(url, hc).GetAwaiter().GetResult();
+            return new SenparcHttpResponse(response);
+#endif
+
+
         }
 
         #endregion
@@ -365,16 +471,16 @@ namespace Senparc.Weixin.HttpUtility
         /// 使用Post方法获取字符串结果，常规提交
         /// </summary>
         /// <returns></returns>
-        public static async Task<string> HttpPostAsync(string url, CookieContainer cookieContainer = null, Dictionary<string, string> formData = null, Encoding encoding = null, X509Certificate2 cer = null, int timeOut = Config.TIME_OUT)
+        public static async Task<string> HttpPostAsync(string url, CookieContainer cookieContainer = null, Dictionary<string, string> formData = null, Encoding encoding = null, X509Certificate2 cer = null, bool useAjax = false, int timeOut = Config.TIME_OUT)
         {
 #if NET35 || NET40 || NET45
             MemoryStream ms = new MemoryStream();
             await formData.FillFormDataStreamAsync(ms);//填充formData
-            return await HttpPostAsync(url, cookieContainer, ms, null, null, encoding, cer, timeOut);
+            return await HttpPostAsync(url, cookieContainer, ms, null, null, encoding, cer, useAjax, timeOut);
 #else
             MemoryStream ms = new MemoryStream();
             await formData.FillFormDataStreamAsync(ms);//填充formData
-            return await HttpPostAsync(url, cookieContainer, ms, null, null, encoding, cer, timeOut);
+            return await HttpPostAsync(url, cookieContainer, ms, null, null, encoding, cer, useAjax, timeOut);
 #endif
 
         }
@@ -388,23 +494,27 @@ namespace Senparc.Weixin.HttpUtility
         /// <param name="postStream"></param>
         /// <param name="fileDictionary">需要上传的文件，Key：对应要上传的Name，Value：本地文件名</param>
         /// <param name="cer"></param>
+        /// <param name="useAjax"></param>
         /// <param name="timeOut"></param>
         /// <param name="checkValidationResult">验证服务器证书回调自动验证</param>
         /// <param name="refererUrl"></param>
         /// <param name="encoding"></param>
         /// <returns></returns>
-        public static async Task<string> HttpPostAsync(string url, CookieContainer cookieContainer = null, Stream postStream = null, Dictionary<string, string> fileDictionary = null, string refererUrl = null, Encoding encoding = null, X509Certificate2 cer = null, int timeOut = Config.TIME_OUT, bool checkValidationResult = false)
+        public static async Task<string> HttpPostAsync(string url, CookieContainer cookieContainer = null, Stream postStream = null, Dictionary<string, string> fileDictionary = null, string refererUrl = null, Encoding encoding = null, X509Certificate2 cer = null,
+            bool useAjax = false, int timeOut = Config.TIME_OUT, bool checkValidationResult = false)
         {
             if (cookieContainer == null)
             {
                 cookieContainer = new CookieContainer();
             }
 
-#if NET35 || NET40 || NET45
-            var request = HttpPost_Common_Net45(url, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, timeOut, checkValidationResult);
+            postStream = postStream ?? new MemoryStream();
 
-        #region 输入二进制流
-            if (postStream != null)
+#if NET35 || NET40 || NET45
+            var request = HttpPost_Common_Net45(url, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, useAjax, timeOut, checkValidationResult);
+
+            #region 输入二进制流
+            if (postStream != null && postStream.Length > 0)
             {
                 postStream.Position = 0;
 
@@ -426,7 +536,7 @@ namespace Senparc.Weixin.HttpUtility
 
                 postStream.Close();//关闭文件访问
             }
-        #endregion
+            #endregion
 
             HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync());
 
@@ -445,7 +555,7 @@ namespace Senparc.Weixin.HttpUtility
             }
 #else
             HttpContent hc;
-            var client = HttpPost_Common_NetCore(url, out hc, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, timeOut, checkValidationResult);
+            var client = HttpPost_Common_NetCore(url, out hc, cookieContainer, postStream, fileDictionary, refererUrl, encoding, cer, useAjax, timeOut, checkValidationResult);
 
             var r = await client.PostAsync(url, hc);
 

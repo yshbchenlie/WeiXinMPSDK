@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
     
     文件名：SnsApi.cs
     文件功能描述：小程序微信登录
@@ -55,8 +55,8 @@ namespace Senparc.Weixin.Open.WxaAPIs.Sns
         /// <returns></returns>
         public static JsCode2JsonResult JsCode2Json(string appId, string componentAppId, string componentAccessToken, string jsCode, string grantType = "authorization_code", int timeOut = Config.TIME_OUT)
         {
-            const string urlFormat =
-                "https://api.weixin.qq.com/sns/component/jscode2session?appid={0}&js_code={1}&grant_type={2}&component_appid={3}&component_access_token={4}";
+            string urlFormat =
+                Config.ApiMpHost + "/sns/component/jscode2session?appid={0}&js_code={1}&grant_type={2}&component_appid={3}&component_access_token={4}";
 
             var url = string.Format(urlFormat, appId, jsCode, grantType, componentAppId, componentAccessToken);
             var result = Get.GetJson<JsCode2JsonResult>(url);
@@ -80,8 +80,8 @@ namespace Senparc.Weixin.Open.WxaAPIs.Sns
         /// <returns></returns>
         public static async Task<JsCode2JsonResult> JsCode2JsonAsync(string appId, string componentAppId, string componentAccessToken, string jsCode, string grantType = "authorization_code", int timeOut = Config.TIME_OUT)
         {
-            const string urlFormat =
-                "https://api.weixin.qq.com/sns/component/jscode2session?appid={0}&js_code={1}&grant_type={2}&component_appid={3}&component_access_token={4}";
+            string urlFormat =
+                Config.ApiMpHost + "/sns/component/jscode2session?appid={0}&js_code={1}&grant_type={2}&component_appid={3}&component_access_token={4}";
 
             var url = string.Format(urlFormat, appId, jsCode, grantType, componentAppId, componentAccessToken);
             var result = await Get.GetJsonAsync<JsCode2JsonResult>(url);

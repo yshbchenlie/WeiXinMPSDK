@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
 
     文件名：ModifyDomainApi.cs
     文件功能描述：成员管理接口
@@ -59,7 +59,7 @@ namespace Senparc.Weixin.Open.WxaAPIs
         [Obsolete("此方法已过期，请使用Senparc.Weixin.Open.MpAPIs.Open.Create()方法")]
         public static CreateJsonResult CreateTester(string accessToken, string appId)
         {
-            var urlFormat = "https://api.weixin.qq.com/cgi-bin/open/create?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/cgi-bin/open/create?access_token={0}";
             var data = new { appid = appId };
             return CommonJsonSend.Send<CreateJsonResult>(accessToken, urlFormat, data);
         }
@@ -73,7 +73,7 @@ namespace Senparc.Weixin.Open.WxaAPIs
         /// <returns></returns>
         public static TesterResultJson BindTester(string accessToken, string wechatid, int timeOut = Config.TIME_OUT)
         {
-            var url = string.Format("https://api.weixin.qq.com/wxa/bind_tester?access_token={0}", accessToken.AsUrlData());
+            var url = string.Format(Config.ApiMpHost + "/wxa/bind_tester?access_token={0}", accessToken.AsUrlData());
 
             object data;
 
@@ -94,7 +94,7 @@ namespace Senparc.Weixin.Open.WxaAPIs
         /// <returns></returns>
         public static TesterResultJson UnBindTester(string accessToken, string wechatid, int timeOut = Config.TIME_OUT)
         {
-            var url = string.Format("https://api.weixin.qq.com/wxa/unbind_tester?access_token={0}", accessToken.AsUrlData());
+            var url = string.Format(Config.ApiMpHost + "/wxa/unbind_tester?access_token={0}", accessToken.AsUrlData());
 
             object data;
 
@@ -115,7 +115,7 @@ namespace Senparc.Weixin.Open.WxaAPIs
         [Obsolete("此方法已过期，请使用Senparc.Weixin.Open.MpAPIs.Open.Get()方法")]
         public static GetJsonResult GetTester(string accessToken, string appId)
         {
-            var urlFormat = "https://api.weixin.qq.com/cgi-bin/open/get?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/cgi-bin/open/get?access_token={0}";
             var data = new { appid = appId };
             return CommonJsonSend.Send<GetJsonResult>(accessToken, urlFormat, data);
         }
@@ -135,13 +135,13 @@ namespace Senparc.Weixin.Open.WxaAPIs
         [Obsolete("此方法已过期，请使用Senparc.Weixin.Open.MpAPIs.Open.CreateAsync()方法")]
         public static async Task<CreateJsonResult> CreateTesterAsync(string accessToken, string appId)
         {
-            var urlFormat = "https://api.weixin.qq.com/cgi-bin/open/create?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/cgi-bin/open/create?access_token={0}";
             var data = new { appid = appId };
             return await CommonJsonSend.SendAsync<CreateJsonResult>(accessToken, urlFormat, data);
         }
 
         /// <summary>
-        /// 【异步接口】绑定小程序的体验者 接口
+        /// 【异步方法】绑定小程序的体验者 接口
         /// </summary>
         /// <param name="accessToken">authorizer_access_token</param>
         /// <param name="wechatid">微信号</param>
@@ -149,7 +149,7 @@ namespace Senparc.Weixin.Open.WxaAPIs
         /// <returns></returns>
         public static async Task<TesterResultJson> BindTesterSync(string accessToken, string wechatid, int timeOut = Config.TIME_OUT)
         {
-            var url = string.Format("https://api.weixin.qq.com/wxa/bind_tester?access_token={0}", accessToken.AsUrlData());
+            var url = string.Format(Config.ApiMpHost + "/wxa/bind_tester?access_token={0}", accessToken.AsUrlData());
 
             object data;
 
@@ -161,7 +161,7 @@ namespace Senparc.Weixin.Open.WxaAPIs
             return await CommonJsonSend.SendAsync<TesterResultJson>(null, url, data, CommonJsonSendType.POST, timeOut);
         }
         /// <summary>
-        /// 【异步接口】解除绑定小程序的体验者 接口
+        /// 【异步方法】解除绑定小程序的体验者 接口
         /// </summary>
         /// <param name="accessToken">authorizer_access_token</param>
         /// <param name="wechatid">微信号</param>
@@ -169,7 +169,7 @@ namespace Senparc.Weixin.Open.WxaAPIs
         /// <returns></returns>
         public static async Task<TesterResultJson> UnBindTesterSync(string accessToken, string wechatid, int timeOut = Config.TIME_OUT)
         {
-            var url = string.Format("https://api.weixin.qq.com/wxa/unbind_tester?access_token={0}", accessToken.AsUrlData());
+            var url = string.Format(Config.ApiMpHost + "/wxa/unbind_tester?access_token={0}", accessToken.AsUrlData());
 
             object data;
 
@@ -190,7 +190,7 @@ namespace Senparc.Weixin.Open.WxaAPIs
         [Obsolete("此方法已过期，请使用Senparc.Weixin.Open.MpAPIs.Open.GetAsync()方法")]
         public static async Task<GetJsonResult> GetTesterAsync(string accessToken, string appId)
         {
-            var urlFormat = "https://api.weixin.qq.com/cgi-bin/open/get?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/cgi-bin/open/get?access_token={0}";
             var data = new { appid = appId };
             return await CommonJsonSend.SendAsync<GetJsonResult>(accessToken, urlFormat, data);
         }

@@ -1,5 +1,5 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
 
     文件名：AccessTokenContainer.cs
     文件功能描述：通用接口AccessToken容器，用于自动管理AccessToken，如果过期会重新获取
@@ -148,6 +148,12 @@ namespace Senparc.Weixin.Work.Containers
             corpSecret = keyArr[1];
         }
 
+        /// <summary>
+        /// 注册每个corpId和corpSecret，在调用高级接口时可以仅使用AppKey（由 AccessTokenContainer.BuildingKey() 方法获得）
+        /// </summary>
+        /// <param name="corpId"></param>
+        /// <param name="corpSecret"></param>
+        /// <param name="name"></param>
         public static void Register(string corpId, string corpSecret, string name = null)
         {
             //记录注册信息，RegisterFunc委托内的过程会在缓存丢失之后自动重试

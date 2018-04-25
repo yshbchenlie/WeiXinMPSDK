@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net35;net40;net45;netstandard1.6;netstandard2.0</TargetFrameworks>
-    <Version>14.8.1</Version>
+    <TargetFrameworks>net35;net40;net45;netstandard2.0</TargetFrameworks>
+    <Version>14.12.2</Version>
     <AssemblyName>Senparc.Weixin.MP</AssemblyName>
     <RootNamespace>Senparc.Weixin.MP</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -13,7 +13,7 @@
       Senparc.Weixin SDK 开源项目：
       https://github.com/JeffreySu/WeiXinMPSDK
     </Description>
-    <Copyright>Senparc Copyright © 2004~2017</Copyright>
+    <Copyright>Senparc Copyright © 2004~2018</Copyright>
     <PackageTags>微信,weixin,公众号,WeChat,Senparc,盛派,SDK,C#,JSSDK,微信支付,分布式,小程序,JSSDK,微信支付,摇一摇周边</PackageTags>
 
 
@@ -170,7 +170,7 @@
       v13.8.4 尝试解决OAuth：40029-invalid code 错误
 
       v14.1.0
-      为借口添加异步方法
+      为接口添加异步方法
       完善接口
 
       v14.2.2
@@ -341,6 +341,57 @@
       v14.8.0-beta1 重新支持.NET 3.5/4.0
       v14.8.0-beta2 优化多版本支持代码
       v14.8.1 修复几处GetNoncestr还在使用GBK编码
+      v14.8.2 修复发送红包接口的响应XML的解析问题
+      v14.8.3
+      1、添加RequestMessageUnknownType以及相关处理机制，处理未知类型的请求
+      2、新增新增MsgTypeHelper.GetRequestMsgTypeString()方法
+      v14.8.4 支持Senparc.Weixin v4.18.0，支持Ajax模拟请求
+      v14.8.5 卡券Membe完善CardGetResultJson字段rCard_CustomField_NameType枚举添加FIELD_NAME_TYPE_UNKNOW类型
+      v14.8.7 完善CardGetResultJson字段
+      v14.8.8 修正了统计接口关注用户实体类的属性数据类型错误
+      v14.8.9 支持Senparc.Weixin v4.18.5 可自定义API域名
+      v14.8.10 修复红包接口 RedPackApi.SendNormalRedPack() 在.NET 4.6 下的XML解析问题
+      v14.8.11 添加根据标签群发接口，重构原根据分组群发接口
+      v14.8.12 完成群发接口添加clientmsgid属性
+      v14.8.13
+      1、使用 Config.ApiMpFileHost，修改 MediaApi.Get() 方法，可以自动识别文件类型储存
+      2、设置 TenPayV3xxRequestData 的 NonceStr 属性为只读
+      3、AnalysisApi 接口中的 GetUserReadItem 和 GetUserReadHourItem 添加 user_source 属性（用户渠道来源）
+      v14.8.14 CardApi.UpdateUser() 方法参数中重新加添 add_bonus 和 add_balance 两个参数
+      v14.8.15 添加“评论数据管理”接口（共8个）
+
+      v14.9.0 支持异步 MessageHandler
+      v14.9.1 完善AnalysisApi.GetArticleTotal()返回数据字段
+
+      v14.10.0 停止对 .net core 1.1 生成的独立版本
+      v14.10.1 添加RegisterService提供快捷注册方式
+      v14.10.2 微信支付统一下单接口TenPayV3UnifiedorderRequestData数据添加“场景信息”字段（sceneInfo）
+      v14.10.3 增加MessageHandler的file类型处理
+      v14.10.4 WeixinUserInfoResult添加tagid_list属性（用户被打上的标签ID列表）
+      v14.10.5 TenPayV3Result 增加 ResultXML 只读属性
+      v14.10.6 完善“查看指定文章的评论数据”接口（CommentApi.List()）的返回结果数据
+      v14.10.7 MessageHandler消息去重增加对“领取事件推送”的特殊判断
+      v14.10.8 GroupMessageApi.SendGroupMessageByFilter() 方法修复判断错误
+      v14.10.9 TenPayV3UnifiedorderRequestData_SceneInfo 支持新H5支付的场景参数
+      v14.10.10 修正 Net Core 版本错误的代理设置
+      v14.10.11-beta1 测试.net core下的文件上传方法
+      v14.10.12 
+	      1、TenpayV3的GetSignKey()接口，用于获取模拟支付环境下的签名。
+	      2、添加 TenPayV3Util.DecodeRefundReqInfo() 方法，提供给退款通知解密使用
+	      3、支持自定义菜单传入菜单对象为null（自动过滤）
+      v14.10.13 优化 TenPayV3Util.DecodeRefundReqInfo() 方法
+      v14.10.14 优化 Get.Download() 方法，完善对 FileName 的判断
+      v14.10.15 Wifi连接页面支持跳转到小程序。微信返回的JSON有变化。
+      v14.11.0 添加“付款到银行卡”接口
+      v14.11.1 为 TenPayV3.GetTransferInfo() 及对应异步方法添加证书参数。
+      v14.12.0 
+	      1、用户信息扫码场景信息
+	      2、cardapi增加多卡二维码API
+	      3、UpdateUser、MemberCardDeal增加参数
+	      4、统一cardmanageResultjson的类命名规则
+      v14.12.1 修改.NET Core环境下，ResponseHandler 中构造函数传入 HttpContext 的异常提示
+      v14.12.2 修正 MediaApi.GetForeverMedia() 方法永久视频的文件下载过程。
+
     </PackageReleaseNotes>
     <RepositoryUrl>https://github.com/JeffreySu/WeiXinMPSDK</RepositoryUrl>
   </PropertyGroup>
@@ -394,7 +445,7 @@
     <DocumentationFile>..\..\Senparc.Weixin.MP.BuildOutPut\netstandard2.0\Senparc.Weixin.MP.xml</DocumentationFile>
   </PropertyGroup>
 
-  
+
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.6|AnyCPU'">
     <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
@@ -445,7 +496,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageReference Include="System.Xml.XPath.XmlDocument" Version="4.3.0" />
@@ -458,6 +509,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Senparc.Weixin\Senparc.Weixin\Senparc.Weixin.vs2017.csproj" />
+  </ItemGroup>
+
   <!--<ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
@@ -466,11 +521,6 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Net.Http" />
   </ItemGroup>-->
-
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\Senparc.Weixin\Senparc.Weixin\Senparc.Weixin.vs2017.csproj" />
-  </ItemGroup>
 
   <!--<ItemGroup>
     <Folder Include="Properties\" />

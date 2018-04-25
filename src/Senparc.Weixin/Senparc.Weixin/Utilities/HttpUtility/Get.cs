@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
 
     文件名：Get.cs
     文件功能描述：Get
@@ -39,10 +39,21 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
     修改标识：Senparc - 20170409
     修改描述：v4.11.9 修改Download方法
 
+    修改标识：Senparc - 20171101
+    修改描述：v4.18.1 修改Get.Download()方法
+
+    修改标识：Senparc - 20180114
+    修改描述：v4.18.13  修改 HttpUtility.Get.Download() 方法，
+                        根据 Content-Disposition 中的文件名储存文件
+
+    修改标识：Senparc - 20180407
+    修改描述：v14.10.13 优化 Get.Download() 方法，完善对 FileName 的判断
+
 ----------------------------------------------------------------*/
 
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 #if !NET35 && !NET40
@@ -55,6 +66,7 @@ using System.Web.Script.Serialization;
 #endif
 using Senparc.Weixin.Entities;
 using Senparc.Weixin.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace Senparc.Weixin.HttpUtility
 {
@@ -63,6 +75,16 @@ namespace Senparc.Weixin.HttpUtility
     /// </summary>
     public static class Get
     {
+        /// <summary>
+        /// 获取随机文件名
+        /// </summary>
+        /// <returns></returns>
+        private static string GetRandomFileName()
+        {
+            return DateTime.Now.ToString("yyyyMMdd-HHmmss") + Guid.NewGuid().ToString("n").Substring(0, 6);
+        }
+
+
         #region 同步方法
 
         /// <summary>
@@ -146,46 +168,84 @@ namespace Senparc.Weixin.HttpUtility
         /// <summary>
         /// 从Url下载，并保存到指定目录
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="dir"></param>
+        /// <param name="url">需要下载文件的Url</param>
+        /// <param name="filePathName">保存文件的路径，如果下载文件包含文件名，按照文件名储存，否则将分配Ticks随机文件名</param>
         /// <returns></returns>
-        public static string Download(string url, string dir)
+        public static string Download(string url, string filePathName, int timeOut = 999)
         {
+            var dir = Path.GetDirectoryName(filePathName) ?? "/";
             Directory.CreateDirectory(dir);
-#if NET35 || NET40 || NET45
-            WebClient wc = new WebClient();
-            var data = wc.DownloadData(url);
-            var fullName = Path.Combine(dir, DateTime.Now.Ticks.ToString());
-            using (var fs = File.Open(fullName, FileMode.Create))
-            {
-                using (var sw = new StreamWriter(fs))
-                {
-                    sw.Write(data);
-                    sw.Flush();
-                    fs.Flush();
-                    return fullName;
-                }
-            }
-#else
 
+#if NET35 || NET40
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            request.Timeout = timeOut;
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            using (Stream responseStream = response.GetResponseStream())
+            {
+                string responseFileName = null;
+                var contentDescriptionHeader = response.GetResponseHeader("Content-Disposition");
+                if (!string.IsNullOrEmpty(contentDescriptionHeader))
+                {
+                    var fileName = Regex.Match(contentDescriptionHeader, @"(?<=filename="")([\s\S]+)(?= "")", RegexOptions.IgnoreCase).Value;
+
+                    responseFileName = Path.Combine(dir, fileName);
+                }
+
+                var fullName = responseFileName ?? Path.Combine(dir, GetRandomFileName());
+
+                using (var fs = File.Open(filePathName, FileMode.OpenOrCreate))
+                {
+                    byte[] bArr = new byte[1024];
+                    int size = responseStream.Read(bArr, 0, (int)bArr.Length);
+                    while (size > 0)
+                    {
+                        fs.Write(bArr, 0, size);
+                        fs.Flush();
+                        size = responseStream.Read(bArr, 0, (int)bArr.Length);
+                    }
+
+                }
+
+                return fullName;
+            }
+
+#else
             System.Net.Http.HttpClient httpClient = new HttpClient();
             using (var responseMessage = httpClient.GetAsync(url).Result)
             {
                 if (responseMessage.StatusCode == HttpStatusCode.OK)
                 {
-                    var fullName = Path.Combine(dir, responseMessage.Content.Headers.ContentDisposition.FileName.Trim('"'));
+                    string responseFileName = null;
+                    //ContentDisposition可能会为Null
+                    if (responseMessage.Content.Headers.ContentDisposition != null &&
+                        responseMessage.Content.Headers.ContentDisposition.FileName != null &&
+                        responseMessage.Content.Headers.ContentDisposition.FileName != "\"\"")
+                    {
+                        responseFileName = Path.Combine(dir, responseMessage.Content.Headers.ContentDisposition.FileName.Trim('"'));
+                    }
+
+                    var fullName = responseFileName ?? Path.Combine(dir, GetRandomFileName());
                     using (var fs = File.Open(fullName, FileMode.Create))
                     {
                         using (var responseStream = responseMessage.Content.ReadAsStreamAsync().Result)
                         {
                             responseStream.CopyTo(fs);
-                            return fullName;
+                            fs.Flush();
                         }
                     }
+                    return fullName;
+
+                }
+                else
+                {
+                    return null;
                 }
             }
 #endif
-            return null;
         }
         //#endif
         #endregion
@@ -272,29 +332,44 @@ namespace Senparc.Weixin.HttpUtility
         /// <summary>
         /// 【异步方法】从Url下载，并保存到指定目录
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="dir"></param>
+        /// <param name="url">需要下载文件的Url</param>
+        /// <param name="filePathName"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadAsync(string url, string dir)
+        public static async Task<string> DownloadAsync(string url, string filePathName)
         {
+            var dir = Path.GetDirectoryName(filePathName) ?? "/";
             Directory.CreateDirectory(dir);
+
             System.Net.Http.HttpClient httpClient = new HttpClient();
             using (var responseMessage = await httpClient.GetAsync(url))
             {
                 if (responseMessage.StatusCode == HttpStatusCode.OK)
                 {
-                    var fullName = Path.Combine(dir, responseMessage.Content.Headers.ContentDisposition.FileName.Trim('"'));
+                    string responseFileName = null;
+                    //ContentDisposition可能会为Null
+                    if (responseMessage.Content.Headers.ContentDisposition != null &&
+                        responseMessage.Content.Headers.ContentDisposition.FileName != null &&
+                        responseMessage.Content.Headers.ContentDisposition.FileName != "\"\"")
+                    {
+                        responseFileName = Path.Combine(dir, responseMessage.Content.Headers.ContentDisposition.FileName.Trim('"'));
+                    }
+
+                    var fullName = responseFileName ?? Path.Combine(dir, GetRandomFileName());
                     using (var fs = File.Open(fullName, FileMode.Create))
                     {
                         using (var responseStream = await responseMessage.Content.ReadAsStreamAsync())
                         {
                             await responseStream.CopyToAsync(fs);
-                            return fullName;
+                            await fs.FlushAsync();
                         }
                     }
+                    return fullName;
+                }
+                else
+                {
+                    return null;
                 }
             }
-            return null;
         }
         #endregion
 #endif

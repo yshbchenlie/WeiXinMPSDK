@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
     
     文件名：ProductApi.cs
     文件功能描述：微小店商品接口
@@ -55,7 +55,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static AddProductResult AddProduct(string accessToken, AddProductData addProductData)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/create?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/create?access_token={0}";
 
             return CommonJsonSend.Send<AddProductResult>(accessToken, urlFormat, addProductData);
         }
@@ -68,7 +68,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static WxJsonResult DeleteProduct(string accessToken, string productId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/del?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/del?access_token={0}";
 
             var data = new
             {
@@ -88,7 +88,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static WxJsonResult UpDateProduct(string accessToken, UpdateProductData reviseProduct)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/update?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/update?access_token={0}";
 
             return CommonJsonSend.Send<WxJsonResult>(accessToken, urlFormat, reviseProduct);
         }
@@ -101,7 +101,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static GetProductResult GetProduct(string accessToken, string productId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/get?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/get?access_token={0}";
 
             var data = new
             {
@@ -119,7 +119,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static GetByStatusResult GetByStatus(string accessToken, int status)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/getbystatus?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/getbystatus?access_token={0}";
 
             var data = new
             {
@@ -138,7 +138,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static WxJsonResult ModProductStatus(string accessToken, int status,string productId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/modproductstatus?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/modproductstatus?access_token={0}";
 
             var data = new
             {
@@ -157,7 +157,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static GetSubResult GetSub(string accessToken, long cateId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/category/getsub?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/category/getsub?access_token={0}";
 
             var date = new
             {
@@ -175,7 +175,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static GetSkuResult GetSku(string accessToken, long cateId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/category/getsku?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/category/getsku?access_token={0}";
 
             var data = new
             {
@@ -193,7 +193,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static GetPropertyResult GetProperty(string accessToken, long cateId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/category/getproperty?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/category/getproperty?access_token={0}";
 
             var data = new
             {
@@ -214,7 +214,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<AddProductResult> AddProductAsync(string accessToken, AddProductData addProductData)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/create?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/create?access_token={0}";
 
             return await Senparc.Weixin.CommonAPIs.CommonJsonSend.SendAsync<AddProductResult>(accessToken, urlFormat, addProductData);
         }
@@ -227,7 +227,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<WxJsonResult> DeleteProductAsync(string accessToken, string productId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/del?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/del?access_token={0}";
 
             var data = new
             {
@@ -247,7 +247,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<WxJsonResult> UpDateProductAsync(string accessToken, UpdateProductData reviseProduct)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/update?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/update?access_token={0}";
 
             return await Senparc.Weixin.CommonAPIs.CommonJsonSend.SendAsync<WxJsonResult>(accessToken, urlFormat, reviseProduct);
         }
@@ -260,7 +260,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<GetProductResult> GetProductAsync(string accessToken, string productId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/get?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/get?access_token={0}";
 
             var data = new
             {
@@ -278,7 +278,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<GetByStatusResult> GetByStatusAsync(string accessToken, int status)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/getbystatus?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/getbystatus?access_token={0}";
 
             var data = new
             {
@@ -297,7 +297,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<WxJsonResult> ModProductStatusAsync(string accessToken, int status, string productId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/modproductstatus?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/modproductstatus?access_token={0}";
 
             var data = new
             {
@@ -316,7 +316,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<GetSubResult> GetSubAsync(string accessToken, long cateId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/category/getsub?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/category/getsub?access_token={0}";
 
             var date = new
             {
@@ -334,7 +334,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<GetSkuResult> GetSkuAsync(string accessToken, long cateId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/category/getsku?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/category/getsku?access_token={0}";
 
             var data = new
             {
@@ -352,7 +352,7 @@ namespace Senparc.Weixin.MP.AdvancedAPIs.MerChant
         /// <returns></returns>
         public static async Task<GetPropertyResult> GetPropertyAsync(string accessToken, long cateId)
         {
-            var urlFormat = "https://api.weixin.qq.com/merchant/category/getproperty?access_token={0}";
+            var urlFormat = Config.ApiMpHost + "/merchant/category/getproperty?access_token={0}";
 
             var data = new
             {

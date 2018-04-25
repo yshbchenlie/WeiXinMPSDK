@@ -1,8 +1,8 @@
 ﻿/*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
     
-    文件名：UploadResultJson.cs
-    文件功能描述：上传媒体文件返回结果
+    文件名：OAuth2Api.cs
+    文件功能描述：OAuth2接口
     
     
     创建标识：Senparc - 20150313
@@ -28,6 +28,7 @@
 using System;
 using System.Threading.Tasks;
 using Senparc.Weixin.CommonAPIs;
+using Senparc.Weixin.Helpers.Extensions;
 using Senparc.Weixin.HttpUtility;
 using Senparc.Weixin.Work.AdvancedAPIs.OAuth2;
 
@@ -37,23 +38,27 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
     public static class OAuth2Api
     {
         #region 同步方法
-        
-        
+
+
         /*此接口不提供异步方法*/
+
         /// <summary>
         /// 企业获取code
         /// </summary>
         /// <param name="corpId">企业的CorpID</param>
         /// <param name="redirectUrl">授权后重定向的回调链接地址，请使用urlencode对链接进行处理</param>
         /// <param name="state">重定向后会带上state参数，企业可以填写a-zA-Z0-9的参数值</param>
+        /// <param name="agentId">企业应用的id。当scope是snsapi_userinfo或snsapi_privateinfo时，该参数必填。注意redirect_uri的域名必须与该应用的可信域名一致。</param>
         /// <param name="responseType">返回类型，此时固定为：code</param>
         /// <param name="scope">应用授权作用域，此时固定为：snsapi_base</param>
         /// #wechat_redirect 微信终端使用此参数判断是否需要带上身份信息
         /// 员工点击后，页面将跳转至 redirect_uri/?code=CODE&state=STATE，企业可根据code参数获得员工的userid。
         /// <returns></returns>
-        public static string GetCode(string corpId, string redirectUrl, string state, string responseType = "code", string scope = "snsapi_base")
+        public static string GetCode(string corpId, string redirectUrl, string state, string agentId, string responseType = "code", string scope = "snsapi_base")
         {
-            var url = string.Format("https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type={2}&scope={3}&state={4}#wechat_redirect", corpId.AsUrlData(), redirectUrl.AsUrlData(), responseType.AsUrlData(), scope.AsUrlData(), state.AsUrlData());
+            var agendIdValue = agentId.IsNullOrEmpty() ? null : "&agentid={0}".FormatWith(agentId.AsUrlData());
+
+            var url = string.Format("https://open.weixin.qq.com/connect/oauth2/authorize?appid={0}&redirect_uri={1}&response_type={2}&scope={3}{4}&state={5}#wechat_redirect", corpId.AsUrlData(), redirectUrl.AsUrlData(), responseType.AsUrlData(), scope.AsUrlData(), agendIdValue, state.AsUrlData());
 
             return url;
         }
@@ -68,7 +73,7 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
         [Obsolete("请使用新方法GetUserId(string accessToken, string code)")]
         public static GetUserInfoResult GetUserId(string accessToken, string code, string agentId)
         {
-            var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={0}&code={1}&agentid={2}", accessToken.AsUrlData(), code.AsUrlData(), agentId.AsUrlData());
+            var url = string.Format(Config.ApiWorkHost + "/cgi-bin/user/getuserinfo?access_token={0}&code={1}&agentid={2}", accessToken.AsUrlData(), code.AsUrlData(), agentId.AsUrlData());
 
             return Get.GetJson<GetUserInfoResult>(url);
         }
@@ -82,7 +87,7 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
         /// <returns></returns>
         public static GetUserInfoResult GetUserId(string accessToken, string code)
         {
-            var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={0}&code={1}", accessToken.AsUrlData(), code.AsUrlData());
+            var url = string.Format(Config.ApiWorkHost + "/cgi-bin/user/getuserinfo?access_token={0}&code={1}", accessToken.AsUrlData(), code.AsUrlData());
 
             return Get.GetJson<GetUserInfoResult>(url);
         }
@@ -94,9 +99,9 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
         /// <param name="accessToken"></param>
         /// <param name="userTicket">成员票据</param>
         /// <returns></returns>
-        public static GetUserDetailResult GetUserDetail(string accessToken,string userTicket)
+        public static GetUserDetailResult GetUserDetail(string accessToken, string userTicket)
         {
-            var urlFormat = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail?access_token={0}";
+            var urlFormat = Config.ApiWorkHost + "/cgi-bin/user/getuserdetail?access_token={0}";
 
             var data = new
             {
@@ -120,7 +125,7 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
         [Obsolete("请使用新方法GetUserId(string accessToken, string code)")]
         public static async Task<GetUserInfoResult> GetUserIdAsync(string accessToken, string code, string agentId)
         {
-            var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={0}&code={1}&agentid={2}", accessToken.AsUrlData(), code.AsUrlData(), agentId.AsUrlData());
+            var url = string.Format(Config.ApiWorkHost + "/cgi-bin/user/getuserinfo?access_token={0}&code={1}&agentid={2}", accessToken.AsUrlData(), code.AsUrlData(), agentId.AsUrlData());
 
             return await Get.GetJsonAsync<GetUserInfoResult>(url);
         }
@@ -134,7 +139,7 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
         /// <returns></returns>
         public static async Task<GetUserInfoResult> GetUserIdAsync(string accessToken, string code)
         {
-            var url = string.Format("https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={0}&code={1}", accessToken.AsUrlData(), code.AsUrlData());
+            var url = string.Format(Config.ApiWorkHost + "/cgi-bin/user/getuserinfo?access_token={0}&code={1}", accessToken.AsUrlData(), code.AsUrlData());
 
             return await Get.GetJsonAsync<GetUserInfoResult>(url);
         }
@@ -148,7 +153,7 @@ namespace Senparc.Weixin.Work.AdvancedAPIs
         /// <returns></returns>
         public static async Task<GetUserDetailResult> GetUserDetailAsync(string accessToken, string userTicket)
         {
-            var urlFormat = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserdetail?access_token={0}";
+            var urlFormat = Config.ApiWorkHost + "/cgi-bin/user/getuserdetail?access_token={0}";
 
             var data = new
             {

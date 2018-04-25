@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
   
     文件名：RequestMessageFactory.cs
     文件功能描述：获取XDocument转换后的IRequestMessageBase实例
@@ -96,6 +96,9 @@ namespace Senparc.Weixin.MP
                         break;
                     case RequestMsgType.ShortVideo:
                         requestMessage = new RequestMessageShortVideo();
+                        break;
+                    case RequestMsgType.File:
+                        requestMessage = new RequestMessageFile();
                         break;
                     case RequestMsgType.Event:
                         //判断Event类型
@@ -245,7 +248,22 @@ namespace Senparc.Weixin.MP
                         }
                         break;
                     default:
-                        throw new UnknownRequestMsgTypeException(string.Format("MsgType：{0} 在RequestMessageFactory中没有对应的处理程序！", msgType), new ArgumentOutOfRangeException());//为了能够对类型变动最大程度容错（如微信目前还可以对公众账号suscribe等未知类型，但API没有开放），建议在使用的时候catch这个异常
+                        {
+                            requestMessage = new RequestMessageUnknownType()
+                            {
+                                RequestDocument = doc
+                            };
+
+                            #region v14.8.3 之前的方案，直接在这里抛出异常
+
+                            /*
+                            throw new UnknownRequestMsgTypeException(string.Format("MsgType：{0} 在RequestMessageFactory中没有对应的处理程序！", msgType), new ArgumentOutOfRangeException());//为了能够对类型变动最大程度容错（如微信目前还可以对公众账号suscribe等未知类型，但API没有开放），建议在使用的时候catch这个异常
+                            */
+
+                            #endregion
+
+                            break;
+                        }
                 }
                 EntityHelper.FillEntityWithXml(requestMessage, doc);
             }

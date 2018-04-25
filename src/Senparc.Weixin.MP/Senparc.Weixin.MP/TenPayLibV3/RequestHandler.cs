@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
  
     文件名：RequestHandler.cs
     文件功能描述：微信支付V3 请求处理
@@ -42,7 +42,10 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
     修改标识：Senparc - 20170319
     修改描述：v14.3.134 修改RequestHandler构造函数
 
-    ----------------------------------------------------------------*/
+    修改标识：Senparc - 20180331
+    修改描述：v14.10.12 更新过期方法
+
+----------------------------------------------------------------*/
 
 using System;
 using System.Collections;
@@ -205,7 +208,7 @@ namespace Senparc.Weixin.MP.TenPayLibV3
             //string sign = MD5UtilHelper.GetMD5(sb.ToString(), GetCharset()).ToUpper();
 
             //编码强制使用UTF8：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=4_1
-            string sign = MD5UtilHelper.GetMD5(sb.ToString(), "UTF-8").ToUpper();
+            string sign = EncryptHelper.GetMD5(sb.ToString(), "UTF-8").ToUpper();
 
             return sign;
         }

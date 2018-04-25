@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -112,7 +112,10 @@ namespace Senparc.Weixin.XmlUtility
         /// <returns></returns>
         public static XDocument Convert(Stream stream)
         {
-            stream.Seek(0, SeekOrigin.Begin);//强制调整指针位置
+            if (stream.CanSeek)
+            {
+                stream.Seek(0, SeekOrigin.Begin);//强制调整指针位置
+            }
             using (XmlReader xr = XmlReader.Create(stream))
             {
                 return XDocument.Load(xr);

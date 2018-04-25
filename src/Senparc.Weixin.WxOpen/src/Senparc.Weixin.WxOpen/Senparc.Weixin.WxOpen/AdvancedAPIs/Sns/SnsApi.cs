@@ -1,7 +1,7 @@
 ﻿#region Apache License Version 2.0
 /*----------------------------------------------------------------
 
-Copyright 2017 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
+Copyright 2018 Jeffrey Su & Suzhou Senparc Network Technology Co.,Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 except in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@ Detail: https://github.com/JeffreySu/WeiXinMPSDK/blob/master/license.md
 #endregion Apache License Version 2.0
 
 /*----------------------------------------------------------------
-    Copyright (C) 2017 Senparc
+    Copyright (C) 2018 Senparc
     
     文件名：SnsApi.cs
     文件功能描述：小程序Sns下接口
@@ -32,7 +32,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Senparc.Weixin.Entities;
 using Senparc.Weixin.HttpUtility;
-using Senparc.Weixin.WxOpen.AdvancedAPIs.Template.TemplateJson;
 
 namespace Senparc.Weixin.WxOpen.AdvancedAPIs.Sns
 {
@@ -60,8 +59,8 @@ namespace Senparc.Weixin.WxOpen.AdvancedAPIs.Sns
         /// <returns></returns>
         public static JsCode2JsonResult JsCode2Json(string appId, string secret, string jsCode, string grantType = "authorization_code", int timeOut = Config.TIME_OUT)
         {
-            const string urlFormat =
-                "https://api.weixin.qq.com/sns/jscode2session?appid={0}&secret={1}&js_code={2}&grant_type={3}";
+            string urlFormat =
+                Config.ApiMpHost + "/sns/jscode2session?appid={0}&secret={1}&js_code={2}&grant_type={3}";
 
             var url = string.Format(urlFormat, appId, secret, jsCode, grantType);
             var result = Get.GetJson<JsCode2JsonResult>(url);
@@ -84,8 +83,8 @@ namespace Senparc.Weixin.WxOpen.AdvancedAPIs.Sns
         /// <returns></returns>
         public static async Task<JsCode2JsonResult> JsCode2JsonAsync(string appId, string secret, string jsCode, string grantType = "authorization_code", int timeOut = Config.TIME_OUT)
         {
-            const string urlFormat =
-                "https://api.weixin.qq.com/sns/jscode2session?appid={0}&secret={1}&js_code={2}&grant_type={3}";
+            string urlFormat =
+                Config.ApiMpHost + "/sns/jscode2session?appid={0}&secret={1}&js_code={2}&grant_type={3}";
 
             var url = string.Format(urlFormat, appId, secret, jsCode, grantType);
 
